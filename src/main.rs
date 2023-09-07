@@ -2,22 +2,52 @@
 mod graph {
 
     pub struct Graph<'a>{
-        m_node_list: Vec<&'a Node<'a>>,
-        m_edge_list: Vec<&'a Edge>,
+        m_node_list: Vec<Node<'a>>,
+        m_edge_list: Vec<Edge>,
     }
 
-    impl <'a> Graph<'a>{
+    impl <'a>Graph<'a>{
 
-        pub fn new() -> Graph <'a>{
+        pub fn new() -> Graph<'a> {
             return Graph{m_node_list: vec![], m_edge_list: vec![]};	
         }
 
-        pub fn add_node(&mut self,node: &'a Node) {
+        pub fn build_graph(&'a mut self) {
+        // Create nodes 
+        let mut node1: Node = Node::new(0);
+        let mut node2: Node = Node::new(1);
+        let mut node3: Node = Node::new(2);
+
+        self.m_node_list.push(node1);
+        self.m_node_list.push(node2);
+        self.m_node_list.push(node3);
+
+
+        let mut edge12: Edge = Edge::new(0,self.m_node_list[0].idx(),self.m_node_list[1].idx());
+        let mut edge13: Edge = Edge::new(1,self.m_node_list[0].idx(),self.m_node_list[2].idx());
+        let mut edge23: Edge = Edge::new(2,self.m_node_list[1].idx(),self.m_node_list[2].idx());
+
+        self.m_edge_list.push(edge12);
+        self.m_edge_list.push(edge13);
+        self.m_edge_list.push(edge23);
+
+        //let mut edge12: graph::Edge = graph::Edge::new(0);
+        // Define nodes 
+        self.m_node_list[0].add_edge(&self.m_edge_list[0]);
+        self.m_node_list[1].add_edge(&self.m_edge_list[0]);
+        self.m_node_list[0].add_edge(&self.m_edge_list[1]);
+        self.m_node_list[2].add_edge(&self.m_edge_list[1]);
+        self.m_node_list[1].add_edge(&self.m_edge_list[2]);
+        self.m_node_list[2].add_edge(&self.m_edge_list[2]);
+
+        }
+
+        pub fn add_node(&mut self,node: Node<'a>) {
             self.m_node_list.push(node);
 
         }
 
-        pub fn add_edge(&mut self, edge: &'a Edge) {
+        pub fn add_edge(&mut self, edge: Edge) {
             self.m_edge_list.push(edge);
         }
 
@@ -33,13 +63,13 @@ mod graph {
         m_edge_list: Vec<&'a Edge>,
     }
 
-    impl <'a> Node <'a> {
-        pub fn new(idx: u16) -> Node<'a> {
+    impl <'a> Node <'a>{
+        pub fn new(idx: u16) -> Node<'a>{
             //let mut edge_list: Vec<&Edge> = vec![];
             return Node {m_idx: idx, m_edge_list: vec![]};
         }
         
-        pub fn add_edge(&mut self, edge:&'a Edge) {
+        pub fn add_edge(&mut self, edge: &'a Edge) {
             self.m_edge_list.push(edge);
         }
 
@@ -63,8 +93,6 @@ mod graph {
             return Edge{m_idx: idx, m_node_idx_start: node_idx_start, m_node_idx_end:node_idx_end};
         }
 
-    
-
     }
 
 
@@ -73,31 +101,7 @@ mod graph {
 
 fn main() {
 
-    // Make list of nodes 
-    let mut node1: graph::Node = graph::Node::new(0);
-    let mut node2: graph::Node = graph::Node::new(1);
-    let mut node3: graph::Node = graph::Node::new(2);
-    let mut edge12: graph::Edge = graph::Edge::new(0,node1.idx(),node2.idx());
-    let mut edge13: graph::Edge = graph::Edge::new(1,node1.idx(),node3.idx());
-    let mut edge23: graph::Edge = graph::Edge::new(2,node2.idx(),node3.idx());
-
-    //let mut edge12: graph::Edge = graph::Edge::new(0);
-    // Define nodes 
-    node1.add_edge(&edge12);
-    node2.add_edge(&edge12);
-    node1.add_edge(&edge13);
-    node3.add_edge(&edge13);
-    node2.add_edge(&edge23);
-    node3.add_edge(&edge23);
-
-    
     let mut example_graph =  graph::Graph::new();
-    example_graph.add_node(&node1);
-    example_graph.add_node(&node3);
-    example_graph.add_node(&node2);
-    example_graph.add_edge(&edge12);
-    example_graph.add_edge(&edge13);
-    example_graph.add_edge(&edge23);
-    example_graph.sort_node_list();
+    example_graph.build_graph();
     println!("Hello, world!");
 }
