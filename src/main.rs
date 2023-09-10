@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+//use std::collections::HashMap;
 use std::fmt;
 
 mod graph {
@@ -24,58 +24,67 @@ mod graph {
     impl <'a>Graph<'a>{
 
         pub fn new(name: String) -> Graph<'a> {
-            return Graph{m_name: name,m_nodes: HashMap::new(), m_edges:HashMap::new()};	
+            // Create nodes
+            let mut nodes: HashMap<u16, Node<'a>> = HashMap::new();
+            let mut edges: HashMap<u16, Edge> = HashMap::new();
+
+            let node_idx1: u16 = 1; 
+            let node_idx2: u16 = 2;
+            let node_idx3: u16 = 3;
+            let mut all_node_idxs =  vec![node_idx1,node_idx2,node_idx3];
+            let mut node1: Node = Node::new(node_idx1);
+            let mut node2: Node = Node::new(node_idx2);
+            let mut node3: Node = Node::new(node_idx3);
+
+            nodes.insert(node1.idx(), node1);
+            nodes.insert(node2.idx(), node2);
+            nodes.insert(node3.idx(), node3);
+
+
+            let edge_idx1: u16 = 1; 
+            let edge_idx2: u16 = 2;
+            let edge_idx3: u16 = 3;
+            let mut all_edge_idxs =  vec![edge_idx1,edge_idx2,edge_idx3];
+            let mut edge12: Edge = Edge::new(0,node_idx1,node_idx2);
+            let mut edge13: Edge = Edge::new(1,node_idx1,node_idx3);
+            let mut edge23: Edge = Edge::new(2,node_idx2,node_idx3);
+
+            edges.insert(edge12.idx(),edge12);
+            edges.insert(edge13.idx(),edge13);
+            edges.insert(edge23.idx(),edge23);
+
+            let mut build_graph = Graph{m_name: name,m_nodes: nodes, m_edges: edges};
+
+
+            //let mut edge12: graph::Edge = graph::Edge::new(0);
+            // Define nodes 
+            for idx in all_node_idxs.iter() {
+                match build_graph.m_nodes.get_mut(idx) {
+                    Some(x) => {
+                        for (key,value) in build_graph.m_edges.iter(){
+                            if value.m_node_idx_end == x.idx() {
+                                x.add_edge(value);
+                            }
+                            else if  value.m_node_idx_start == x.idx(){
+                                x.add_edge(value);
+                            }        
+            
+                        }
+                            
+                    },
+                    None => panic!("Idx {} unknown",node_idx1)
+                }
+
+            }
+
+
+
+            return build_graph;	
         }
 
         pub fn build_graph(&'a mut self) {
         
-        // Create nodes
         
-        let node_idx1: u16 = 1; 
-        let node_idx2: u16 = 2;
-        let node_idx3: u16 = 3;
-        let mut all_node_idxs =  vec![node_idx1,node_idx2,node_idx3];
-        let mut node1: Node = Node::new(node_idx1);
-        let mut node2: Node = Node::new(node_idx2);
-        let mut node3: Node = Node::new(node_idx3);
-
-        self.m_nodes.insert(node1.idx(), node1);
-        self.m_nodes.insert(node2.idx(), node2);
-        self.m_nodes.insert(node3.idx(), node3);
-
-
-        let edge_idx1: u16 = 1; 
-        let edge_idx2: u16 = 2;
-        let edge_idx3: u16 = 3;
-        let mut all_edge_idxs =  vec![edge_idx1,edge_idx2,edge_idx3];
-        let mut edge12: Edge = Edge::new(0,node_idx1,node_idx2);
-        let mut edge13: Edge = Edge::new(1,node_idx1,node_idx3);
-        let mut edge23: Edge = Edge::new(2,node_idx2,node_idx3);
-
-        self.m_edges.insert(edge12.idx(),edge12);
-        self.m_edges.insert(edge13.idx(),edge13);
-        self.m_edges.insert(edge23.idx(),edge23);
-
-        //let mut edge12: graph::Edge = graph::Edge::new(0);
-        // Define nodes 
-        for idx in all_node_idxs.iter() {
-            match self.m_nodes.get_mut(idx) {
-                Some(x) => {
-                    for (key,value) in self.m_edges.iter(){
-                        if value.m_node_idx_end == x.idx() {
-                            x.add_edge(value);
-                        }
-                        else if  value.m_node_idx_start == x.idx(){
-                            x.add_edge(value);
-                        }        
-        
-                    }
-                           
-                },
-                None => panic!("Idx {} unknown",node_idx1)
-            }
-
-        }
     
         //self.m_node_list[1].add_edge(&self.m_edge_list[0]);
         //self.m_node_list[0].add_edge(&self.m_edge_list[1]);
