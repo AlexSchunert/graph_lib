@@ -1,5 +1,6 @@
-//use std::collections::HashMap;
-use std::fmt;
+
+mod file_io;
+
 
 mod graph {
     use core::fmt;
@@ -197,9 +198,19 @@ mod graph {
 fn main() {
 
     //let mut example_graph: Box<graph::Graph>=  Box::new(graph::Graph::new("Example".to_string()));
-    let mut example_graph: graph::Graph=  graph::Graph::new("Example".to_string());
-    example_graph.build_graph();
+    //let mut example_graph: graph::Graph=  graph::Graph::new("Example".to_string());
+    //example_graph.build_graph();
+    //print!("tt {}",example_graph);
+
+    let graph_filename: String = "example_graph.xml".to_string();
+    let file_content_string = file_io::read_txt_file(graph_filename);
+    let root: minidom::Element;
+    print!("{}",file_content_string);
+    match file_content_string.parse() {
+        Ok(x) => root = x,
+        Err(e) => panic!("XML parsing error {}",e),
+    }
     
-    print!("tt {}",example_graph);
-    //println!("Graph: {}", example_graph);
+    println!("{:#?}", root);
+    println!("End");
 }
