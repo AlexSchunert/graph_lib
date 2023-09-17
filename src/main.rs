@@ -10,8 +10,8 @@ mod graph {
     pub struct Graph{
         //m_node_list: Vec<Node<'a>>,
         m_name: String,
-        m_nodes: HashMap<u16, Node>,
-        m_edges: HashMap<u16, Edge>,
+        m_nodes: HashMap<String, Node>,
+        m_edges: HashMap<String, Edge>,
     }
 
     
@@ -44,54 +44,65 @@ mod graph {
            //let mut nodes: HashMap<u16, Node> = HashMap::new();
            //let mut edges: HashMap<u16, Edge> = HashMap::new();
 
-           let node_idx1: u16 = 1; 
-           let node_idx2: u16 = 2;
-           let node_idx3: u16 = 3;
-           let mut all_node_idxs =  vec![node_idx1,node_idx2,node_idx3];
-           let mut node1: Node = Node::new(node_idx1);
-           let mut node2: Node = Node::new(node_idx2);
-           let mut node3: Node = Node::new(node_idx3);
+           let node_id1: String = "1".to_string(); 
+           let node_id2: String = "2".to_string();
+           let node_id3: String = "3".to_string();
+           //let mut all_node_ids =  vec![node_id1,node_id2,node_id3];
+           let mut node1: Node = Node::new(node_id1);
+           let mut node2: Node = Node::new(node_id2);
+           let mut node3: Node = Node::new(node_id3);
 
            self.m_nodes.insert(node1.idx(), node1);
            self.m_nodes.insert(node2.idx(), node2);
            self.m_nodes.insert(node3.idx(), node3);
 
 
-           let edge_idx1: u16 = 1; 
-           let edge_idx2: u16 = 2;
-           let edge_idx3: u16 = 3;
-           let mut all_edge_idxs =  vec![edge_idx1,edge_idx2,edge_idx3];
-           let mut edge12: Edge = Edge::new(0,node_idx1,node_idx2);
-           let mut edge13: Edge = Edge::new(1,node_idx1,node_idx3);
-           let mut edge23: Edge = Edge::new(2,node_idx2,node_idx3);
+           let edge_id1: String = "1-2".to_string(); 
+           let edge_id2: String = "1-3".to_string();
+           let edge_id3: String = "2-3".to_string();
+           //let mut all_edge_ids =  vec![edge_id1,edge_id2,edge_id3];
+           let mut edge12: Edge = Edge::new(edge_id1,"1".to_string(),"2".to_string());
+           let mut edge13: Edge = Edge::new(edge_id2,"1".to_string(),"3".to_string());
+           let mut edge23: Edge = Edge::new(edge_id3,"2".to_string(),"3".to_string());
 
            self.m_edges.insert(edge12.idx(),edge12);
            self.m_edges.insert(edge13.idx(),edge13);
            self.m_edges.insert(edge23.idx(),edge23);
 
 
+           for (node_id, node) in self.m_nodes.iter_mut() {
+            for (edge_id, edge) in self.m_edges.iter(){
+                if edge.m_node_id_end == *node_id {
+                    node.add_edge(edge);
+                }
+                else if  edge.m_node_id_start == *node_id {
+                    node.add_edge(edge);
+                }        
+
+            }
+           }
 
 
-           //let mut edge12: graph::Edge = graph::Edge::new(0);
-           // Define nodes 
-           for idx in all_node_idxs.iter() {
-               match self.m_nodes.get_mut(idx) {
+           /*
+           for id in all_node_ids.iter() {
+               match self.m_nodes.get_mut(id) {
                    Some(x) => {
                        for (_key,value) in self.m_edges.iter(){
-                           if value.m_node_idx_end == x.idx() {
+                           if value.m_node_id_end == x.idx() {
                                x.add_edge(value);
                            }
-                           else if  value.m_node_idx_start == x.idx(){
+                           else if  value.m_node_id_start == x.idx(){
                                x.add_edge(value);
                            }        
            
                        }
                            
                    },
-                   None => panic!("Idx {} unknown",node_idx1)
+                   None => panic!("Id {} unknown",id)
                }
 
            }
+            */
         
         
     
@@ -135,14 +146,14 @@ mod graph {
     }
 
     pub struct Node {
-        m_idx: u16,
-        m_incident_edges_idx: Vec<u16>,
+        m_id: String,
+        m_incident_edges_ids: Vec<String>,
     }
 
     impl fmt::Display  for Node {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "Node idx: {}, Edges: [",self.m_idx)?;
-            for edge_idx in self.m_incident_edges_idx.iter() {
+            write!(f, "Node idx: {}, Edges: [",self.m_id)?;
+            for edge_idx in self.m_incident_edges_ids.iter() {
                 write!(f," {} ",edge_idx)?;
             }
             write!(f,"]\n")
@@ -150,29 +161,29 @@ mod graph {
     }
 
     impl  Node {
-        pub fn new(idx: u16) -> Node{
+        pub fn new(idx: String) -> Node{
             //let mut edge_list: Vec<&Edge> = vec![];
-            return Node {m_idx: idx, m_incident_edges_idx: vec![]};
+            return Node {m_id: idx, m_incident_edges_ids: vec![]};
         }
         
         pub fn add_edge(&mut self, edge: &Edge) {
-            self.m_incident_edges_idx.push(edge.idx());
+            self.m_incident_edges_ids.push(edge.idx());
         }
 
-        pub fn idx(&self) -> u16 {
-            return self.m_idx;
+        pub fn idx(&self) -> String {
+            return self.m_id.clone();
         }
     }
 
     pub struct Edge{
-        m_idx: u16,
-        m_node_idx_start: u16,
-        m_node_idx_end: u16,
+        m_id: String,
+        m_node_id_start: String,
+        m_node_id_end: String,
     }
 
     impl fmt::Display  for Edge {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "Edge idx: {}, Idx Node Start: {}, Idx Node End {}\n",self.m_idx, self.m_node_idx_start, self.m_node_idx_end)
+            write!(f, "Edge idx: {}, Idx Node Start: {}, Idx Node End {}\n",self.m_id, self.m_node_id_start, self.m_node_id_end)
         }
     }
 
@@ -180,13 +191,13 @@ mod graph {
         //pub fn new(idx: u16, node_start: &'a Node, node_end: &'a Node) -> Edge<'a>{    
         //    return Edge{m_idx: idx, m_node_start: node_start, m_node_end: node_end};
         //}
-        pub fn new(idx: u16, node_idx_start: u16, node_idx_end: u16) -> Edge{
+        pub fn new(id: String, node_id_start: String, node_id_end: String) -> Edge{
 
-            return Edge{m_idx: idx, m_node_idx_start: node_idx_start, m_node_idx_end:node_idx_end};
+            return Edge{m_id: id, m_node_id_start: node_id_start, m_node_id_end:node_id_end};
         }
 
-        pub fn idx(&self) -> u16 {
-            return self.m_idx;
+        pub fn idx(&self) -> String {
+            return self.m_id.clone();
         }
 
     }
@@ -198,10 +209,11 @@ mod graph {
 fn main() {
 
     //let mut example_graph: Box<graph::Graph>=  Box::new(graph::Graph::new("Example".to_string()));
-    //let mut example_graph: graph::Graph=  graph::Graph::new("Example".to_string());
-    //example_graph.build_graph();
-    //print!("tt {}",example_graph);
+    let mut example_graph: graph::Graph=  graph::Graph::new("Example".to_string());
+    example_graph.build_graph();
+    print!("tt {}",example_graph);
 
+    /*
     let graph_filename: String = "example_graph.xml".to_string();
     let file_content_string = file_io::read_txt_file(graph_filename);
     let root: minidom::Element;
@@ -213,4 +225,5 @@ fn main() {
     
     println!("{:#?}", root);
     println!("End");
+     */
 }
