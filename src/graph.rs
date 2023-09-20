@@ -65,15 +65,92 @@ impl Graph {
         }
     }
     pub fn build_graph_from_file(&mut self, filename: String) {
+
+        const GRAPH_NS: &'static str = "http://graphml.graphdrawing.org/xmlns";
         let file_content_string = file_io::read_txt_file(filename);
         let root: minidom::Element;
-        print!("{}",file_content_string);
+        //print!("{}",file_content_string);
         match file_content_string.parse() {
             Ok(x) => root = x,
             Err(e) => panic!("XML parsing error {}",e),
         }
-    
-        println!("{:#?}", root);
+        
+        for child in root.children() {
+            if child.is("graph", GRAPH_NS) {
+                match child.attr("id") {
+                    Some(x) => {
+                        println!("Found Graph with id: {}",x);
+                        self.m_name = x.to_string();
+                    },
+                    None => println!("No Graph id found\n"),
+                }
+                for grandchild in child.children() {
+                    if grandchild.is("node", GRAPH_NS) {
+                        match grandchild.attr("id") {
+                            Some(x) => {
+                                println!("Found node with id: {}", x);
+                                let node: Node = Node::new(x.to_string());
+                                self.m_nodes.insert(x.to_string(), node);
+                            },
+                            None => {
+                                println!("Found node but id is missing. Skip")
+                            }, 
+                        }
+                    }
+                    else if grandchild.is("edge", GRAPH_NS) {
+                        let mut edge_valid: bool = true;
+                        let mut node_id_start: String = "".to_string();
+                        let mut node_id_end: String = "".to_string();
+                        match grandchild.attr("source") {
+                            Some(x) => {
+                                print!("Found edge with source: {} ", x);
+                                node_id_start = x.to_string();
+                            },
+                            None => {
+                                println!("Found edge with source: Missing ");
+                                edge_valid = false;
+                            },
+                        }
+                        match grandchild.attr("target") {
+                            Some(x) => {
+                                print!("and target: {} \n", x);
+                                node_id_end = x.to_string();        
+                            },
+                            None => {
+                                println!("and target: Missing \n");
+                                edge_valid = false;
+                            },
+                        }
+                        // Todo: Use option type and pattern matching here
+                        if edge_valid == true {
+                            let edge_id: String = format!("{}{}",node_id_start,node_id_end);
+                            let edge: Edge = Edge::new(edge_id, node_id_start, node_id_end);
+                            self.m_edges.insert(edge.get_id_copy(), edge);
+                        }
+
+                    }
+
+                }
+                
+            }
+        }
+
+        // Make edge lists in nodes
+        for (edge_id, edge) in self.m_edges.iter() {
+            match self.m_nodes.get_mut(&edge.m_node_id_start) {
+                Some(x) => x.add_edge(&edge),
+                None => println!("No node found for start of edge {}",edge_id),
+            }
+            match self.m_nodes.get_mut(&edge.m_node_id_end) {
+                Some(x) => x.add_edge(&edge),
+                None => println!("No node found for end of edge {}",edge_id),
+            }
+        }
+
+        //print!("{}",root.children().);
+
+
+        //println!("{:#?}", root);
     }
     /*
     fn build_node_edge_list(&mut self ,node: &mut Node){

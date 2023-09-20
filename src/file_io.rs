@@ -17,7 +17,7 @@ pub fn read_txt_file(filenname: String) -> String {
     let mut input_file_content = String::new();
     match file.read_to_string(&mut input_file_content) {
         Err(why) => panic!("Could not read {}: {}", display, why),
-        Ok(_) => print!("Read file successfully"),
+        Ok(_) => print!("Read file successfully\n"),
     };
 
     return input_file_content;
