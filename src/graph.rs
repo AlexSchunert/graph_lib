@@ -64,6 +64,7 @@ impl Graph {
             }
         }
     }
+
     pub fn build_graph_from_file(&mut self, filename: String) {
 
         const GRAPH_NS: &'static str = "http://graphml.graphdrawing.org/xmlns";
@@ -127,11 +128,8 @@ impl Graph {
                             let edge: Edge = Edge::new(edge_id, node_id_start, node_id_end);
                             self.m_edges.insert(edge.get_id_copy(), edge);
                         }
-
                     }
-
                 }
-                
             }
         }
 
@@ -151,6 +149,99 @@ impl Graph {
 
 
         //println!("{:#?}", root);
+    }
+
+    fn get_node_neighbors(&self, node_id: &String) -> Vec<&Node> {
+
+        let mut result: Vec<&Node> = Vec::new();
+        let mut current_neighbor_id: &String;// =  String::new();
+        match self.m_nodes.get(node_id) {
+            Some(x) => {
+                for edge_id in x.m_incident_edges_ids.clone() {
+                    let current_edge: &Edge;
+                    match self.m_edges.get(&edge_id) {
+                        Some(y) => current_edge = y,
+                        None => continue
+                    }
+                    if node_id.eq(&current_edge.m_node_id_start) {
+                        current_neighbor_id = &current_edge.m_node_id_end;
+                    }
+                    else {
+                        current_neighbor_id = &current_edge.m_node_id_start;
+                    }
+
+                    match self.m_nodes.get(current_neighbor_id) {
+                        Some(z) => {
+                            result.push(z);
+
+                        },
+                        None => continue,
+                    }
+                }
+            },
+            None => {
+                println!("Node {} not found",node_id);
+                return result;
+            }
+        }
+        return result 
+
+    }
+
+    pub fn depth_first_search(&mut self, start_node_id: String) -> Vec<String>{
+
+        // Get start start
+        let mut result: Vec<String> = Vec::new();
+        let mut node_stack: Vec<&Node> = Vec::new();
+        let mut node_neighbors: Vec<&Node> = Vec::new();
+        
+        match self.m_nodes.get(&start_node_id) {
+            Some(x) => {
+                result.push(start_node_id.clone());
+                node_stack.push(x);
+            },
+            None => {
+                println!("Node {} not found",start_node_id);
+                return result;
+            }
+        }
+
+        
+        // Traverse
+        while node_stack.len() > 0 {
+
+            println!("End of node stack {}",node_stack[node_stack.len()-1].m_id);
+            // Get vector of neighbors for last element in stack
+            node_neighbors = self.get_node_neighbors(&node_stack[node_stack.len()-1].m_id);
+            // Find first unvisited neighbor
+            let mut unvisited_neighbor:Option<&Node> = None;
+            for neighbor in node_neighbors {
+                let mut node_visited: bool = false;
+                for nodes_visited_id in result.as_slice() {
+                    if nodes_visited_id.eq(&neighbor.m_id) {
+                        node_visited = true;
+                    }
+                }
+                if node_visited == false {
+                    unvisited_neighbor = Some(neighbor);
+                    break;
+                }
+            }
+
+            match unvisited_neighbor {
+                Some(x) => {
+                    node_stack.push(x);
+                    result.push(x.get_id_copy());
+                    println!("Pushed node {}",x.m_id);
+                },
+                None => {
+                    println!("Pop node {}",node_stack[node_stack.len()-1].m_id);
+                    node_stack.pop();
+                }
+            }
+        }
+        
+        return result;
     }
     /*
     fn build_node_edge_list(&mut self ,node: &mut Node){
